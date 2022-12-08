@@ -10,48 +10,47 @@ namespace CSV_TXT_to_XLS
 {
     public class Watcher
     {
+        public delegate void Method();
+        public event Method State;
 
-        public string TypeFile { get; set; }
-        public string TypeFileWatch { get; set; }
-        public Action<List<string>> RunMethod { get; set; }
-
-        private FileSystemWatcher watcher;
+        public  bool stateWatcher { get; set; }
+        private string TypeFileWatch { get; set; }
+        private Action<List<string>> RunMethod { get; set; }
+        public FileSystemWatcher watcher;
 
 
         public Watcher(string typeFileWatch, Action<List<string>> runMethod)
         {
             TypeFileWatch = typeFileWatch;
-            RunMethod = runMethod;
+            RunMethod = runMethod;    
             watcher = new FileSystemWatcher();
+        }
+
+        public void Stop()
+        {
+            watcher.Dispose();
+            watcher = new FileSystemWatcher();
+            stateWatcher = watcher.EnableRaisingEvents;
+            State();
         }
 
        public void Findfile(string path, string extansion)
         {
             watcher.Path = path;
-            watcher.NotifyFilter = NotifyFilters.Attributes
-                                 | NotifyFilters.CreationTime
-                                 | NotifyFilters.DirectoryName
-                                 | NotifyFilters.FileName
-                                 | NotifyFilters.LastAccess
-                                 | NotifyFilters.LastWrite
-                                 | NotifyFilters.Security
-                                 | NotifyFilters.Size;
-
             watcher.Created += OnCreated;
             watcher.Filter = extansion;
-            watcher.IncludeSubdirectories = true;
+            watcher.IncludeSubdirectories = false;
             watcher.EnableRaisingEvents = true;
+            stateWatcher = watcher.EnableRaisingEvents;
+            State();
         }
-
-
 
         async void OnCreated(object sender, FileSystemEventArgs e)
         {
                 await Task.Delay(1000);
-
-                       List<string> files = new List<string>();
-            files.Add(e.FullPath);
-                     RunMethod(files);
+                List<string> files = new List<string>();
+                files.Add(e.FullPath);
+                RunMethod(files);
         }
     }
 

@@ -1,26 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using CSV_TXT_to_XLS;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using CSV_TXT_to_XLS.Properties;
-using System.Runtime;
-using System.ComponentModel.Composition.Primitives;
 
-        namespace CSV_TXT_to_XLS
+namespace CSV_TXT_to_XLS
 {
     public partial class Form1 : Form
     {
-       // string type = "CSV";
+      
         Settings settings = new Settings();
         AbstractReport Report;
-        
+        Watcher watcher;
 
         protected override void OnFormClosing(FormClosingEventArgs eventArgs)
         {
@@ -36,12 +29,13 @@ using System.ComponentModel.Composition.Primitives;
             TxtB_FileOriginal.DragLeave += (s, a) => { TxtB_FileOriginal.Text = $"Выберите или перетащите{settings.TypeFileWatch} файл"; };
             radioButton1.CheckedChanged += (s, a) => { Type_change(); };
             radioButton2.CheckedChanged += (s, a) => { Type_change(); };
-           btn_formHeigth.MouseEnter += (s, a) => { btn_formHeigth.BackColor = SystemColors.ControlDark; };
-           btn_formHeigth.MouseLeave += (s, a) => { btn_formHeigth.BackColor = SystemColors.Control; };
+            btn_formHeigth.MouseEnter += (s, a) => { btn_formHeigth.BackColor = SystemColors.ControlDark; };
+            btn_formHeigth.MouseLeave += (s, a) => { btn_formHeigth.BackColor = SystemColors.Control; };
             radioButton1.CheckedChanged += (s, a) => { settings.integrator = radioButton1.Checked; };
             btn_SelectFolder.Click += (s, a) => { SelectFolder(); };
             btn_FindFile.Click += (s, a) => { FindFileForReport(); };
             btn_formHeigth.Click += (s, a) =>{  ResizeThisForm();};
+                 
             }
         void Form1_Load(object sender, EventArgs e)
         {
@@ -60,7 +54,7 @@ using System.ComponentModel.Composition.Primitives;
             Type_change();
         }
 
-        void InitApp()   //инициализация
+        void InitApp()   
         {
             settings = SerializeData<Settings>.Restore(Application.ExecutablePath.Replace(".exe", ".xml"));
             txtB_FolderForWatcher.Text = settings.DirectoryPath;
@@ -68,19 +62,25 @@ using System.ComponentModel.Composition.Primitives;
             radioButton1.Checked = settings.integrator;
             radioButton2.Checked = !settings.integrator;
             if (settings.ModeHeight) ResizeThisForm();
-        
-                Opacity = settings.HideMode ? 0 : 1;
-                ShowInTaskbar = checkBox1.Checked ? false : true;
-       
-            
+            Opacity = settings.HideMode ? 0 : 1;
+            ShowInTaskbar = checkBox1.Checked ? false : true;
+
+            watcher = new Watcher(settings.TypeFileWatch, Report.MakeReport);
+            watcher.State += getStateWatcher;
+             if (Directory.Exists(txtB_FolderForWatcher.Text))
+             {
+                watcher.Findfile(txtB_FolderForWatcher.Text, $"*.{settings.TypeFileWatch.ToLower()}");
+             }
 
         }
         void SelectFolder()
         {
-            folderBrowserDialog1.ShowDialog();
-            txtB_FolderForWatcher.Text = folderBrowserDialog1.SelectedPath;
-            Watcher watcher = new Watcher(settings.TypeFileWatch, Report.MakeReport);
-            watcher.Findfile(folderBrowserDialog1.SelectedPath, $"*.{settings.TypeFileWatch.ToLower()}");
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                txtB_FolderForWatcher.Text = folderBrowserDialog1.SelectedPath;
+                watcher.Findfile(txtB_FolderForWatcher.Text, $"*.{settings.TypeFileWatch.ToLower()}");
+            }
+           
         }
 
         void FindFileForReport()
@@ -91,7 +91,7 @@ using System.ComponentModel.Composition.Primitives;
           //  StatusText.Text = "Тут будет имя преобразованного файла";
         }
 
-     void button1_Click(object sender, EventArgs e)
+     void btn_MakeOneReport_Click(object sender, EventArgs e)
         {
             if (File.Exists(TxtB_FileOriginal.Text)) {
                 var files = new List<string>();
@@ -123,7 +123,7 @@ using System.ComponentModel.Composition.Primitives;
             }
         }
 
-        void button2_Click(object sender, EventArgs e)
+        void btn_OpenReport_click(object sender, EventArgs e)
         {
             if (File.Exists(StatusText.Text))
                 Process.Start(new ProcessStartInfo("explorer", $"/n, /select, {StatusText.Text}"));  
@@ -151,13 +151,11 @@ using System.ComponentModel.Composition.Primitives;
             if (Directory.Exists(line[0].ToString()))
             {
                 txtB_FolderForWatcher.Text = line[0].ToString();
-                //         Findfile(line[0].ToString(), $"*.{type.ToLower()}", watch_CSV);
+                watcher.Findfile(txtB_FolderForWatcher.Text, $"*.{settings.TypeFileWatch.ToLower()}");
                 Saveconfig();
             }
             else txtB_FolderForWatcher.Text = "Не является папкой";
         }
-
-
 
         private void DragEnterTextBox(object sender, DragEventArgs e)
         {
@@ -174,12 +172,10 @@ using System.ComponentModel.Composition.Primitives;
       
            if (radioButton1.Checked) 
             {
-             //   type = "CSV";
                 settings.TypeFileWatch = "CSV";
                 Report = new ReportFromCSV(); ;
             } else
             {
-            //    type = "TXT";
                 settings.TypeFileWatch = "TXT";
                 Report = new ReportFromTXT(); ;
             }
@@ -219,15 +215,35 @@ using System.ComponentModel.Composition.Primitives;
            if (listBox_AllFile.Items.Count > 0 )
             {
               var files = new List<string>();
-                foreach (ListViewItem item in listBox_AllFile.Items)
-                    files.Add(item.Text);
-                    Report.MakeReport(files); ;
+                foreach (var item in listBox_AllFile.Items)
+                    files.Add(item.ToString());
+                   
+                Report.MakeReport(files); ;
              }
                 
            
         }
 
-     
+       
+        void getStateWatcher()
+        {
+            lb_statusWatcher.Text = watcher.stateWatcher ? "Отслеживание запущено" : "Отслеживание остановлено";
+            lb_statusWatcher.ForeColor = watcher.stateWatcher ? Color.Green: Color.Red;
+            btn_ControlWatcher.Text = watcher.stateWatcher ? "Остоновить" : "Запустить";
+            btn_ControlWatcher.BackColor = watcher.stateWatcher ? Color.Yellow: Color.LawnGreen;
+        }
+
+        private void btn_ControlWatcher_Click(object sender, EventArgs e)
+        {
+            if(watcher.stateWatcher)
+            watcher.Stop();
+            else if (Directory.Exists(txtB_FolderForWatcher.Text))
+            {
+                watcher.Findfile(txtB_FolderForWatcher.Text, $"*.{settings.TypeFileWatch.ToLower()}");
+            }
+            else MessageBox.Show("Путь для отслеживания отсутствует", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+        }
     }
 
 }

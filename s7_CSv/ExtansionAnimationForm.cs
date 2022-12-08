@@ -9,8 +9,6 @@ namespace CSV_TXT_to_XLS
 {
     public static  class ExtansionAnimationForm
     {
-
-        
        public static async void ResizeHeight(this System.Windows.Forms.Form form, int minHeight=273, int maxHeight = 450)
         {
             bool move = false;

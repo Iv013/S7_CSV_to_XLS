@@ -12,7 +12,6 @@ namespace CSV_TXT_to_XLS
     {
         public delegate void Method();
         public event Method State;
-
         public  bool stateWatcher { get; set; }
         private string TypeFileWatch { get; set; }
         private Action<List<string>> RunMethod { get; set; }
@@ -43,13 +42,14 @@ namespace CSV_TXT_to_XLS
             watcher.EnableRaisingEvents = true;
             stateWatcher = watcher.EnableRaisingEvents;
             State();
-        }
+       }
 
         async void OnCreated(object sender, FileSystemEventArgs e)
         {
                 await Task.Delay(1000);
                 List<string> files = new List<string>();
                 files.Add(e.FullPath);
+
                 RunMethod(files);
         }
     }

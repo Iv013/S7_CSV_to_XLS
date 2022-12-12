@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Diagnostics;
 using CSV_TXT_to_XLS.Properties;
+using System.Linq;
 
 namespace CSV_TXT_to_XLS
 {
@@ -35,24 +36,32 @@ namespace CSV_TXT_to_XLS
             btn_SelectFolder.Click += (s, a) => { SelectFolder(); };
             btn_FindFile.Click += (s, a) => { FindFileForReport(); };
             btn_formHeigth.Click += (s, a) =>{  ResizeThisForm();};
-                 
-            }
+            
+        }
         void Form1_Load(object sender, EventArgs e)
         {
-            int countProcces = 0;
-            foreach (Process process in Process.GetProcesses())  //получаем список процессов
-            if (process.ProcessName == "CSV_TXT_to XLS") countProcces++;         //Считаем скольок процессов запущено с данным именем 
-           
-            if (countProcces > 1)
-            {
-                MessageBox.Show("Данное приложение уже запущено.\n " +
-                    "Если приложение не отображается необходимо переоткрыть приложение с атрибутом V", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-
             InitApp();
-            Type_change();
+            foreach (Process process in Process.GetProcesses())
+                if ((process.ProcessName == "CSV_TXT_to XLS")) 
+                    if (process.Id != Process.GetCurrentProcess().Id)
+                    {
+                        process.Kill();
+                        if (SearchStartArgument())
+                            Opacity = 1;               
+                        else
+                            MessageBox.Show("Данное приложение уже запущено. " +
+                            "Если приложение не отображается необходимо переоткрыть приложение с атрибутом VIS "+
+                            "либо в файле настроек параметр HideMode установить  в значение false", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }                   
         }
+
+        private bool SearchStartArgument()
+        { bool result = false;
+            Environment.GetCommandLineArgs().ToList().ForEach(x => { if (x.Contains("VIS")) result = true; } 
+            );
+            return result;
+        }
+
 
         void InitApp()   
         {
@@ -65,13 +74,15 @@ namespace CSV_TXT_to_XLS
             Opacity = settings.HideMode ? 0 : 1;
             ShowInTaskbar = checkBox1.Checked ? false : true;
 
+
             watcher = new Watcher(settings.TypeFileWatch, Report.MakeReport);
             watcher.State += getStateWatcher;
              if (Directory.Exists(txtB_FolderForWatcher.Text))
              {
                 watcher.Findfile(txtB_FolderForWatcher.Text, $"*.{settings.TypeFileWatch.ToLower()}");
              }
-
+            Type_change();
+            Report.SetState += SetStatusText;
         }
         void SelectFolder()
         {
@@ -125,12 +136,12 @@ namespace CSV_TXT_to_XLS
 
         void btn_OpenReport_click(object sender, EventArgs e)
         {
-            if (File.Exists(StatusText.Text))
-                Process.Start(new ProcessStartInfo("explorer", $"/n, /select, {StatusText.Text}"));  
+            if (File.Exists(lbl_StatusText.Text))
+                Process.Start(new ProcessStartInfo("explorer", $"/n, /select, {lbl_StatusText.Text}"));  
             else
             {
                 MessageBox.Show("Файл отсутcтвует", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                StatusText.Text = "Файл отсутcтвует";
+                lbl_StatusText.Text = "Файл отсутcтвует";
             }
         }
 
@@ -140,7 +151,7 @@ namespace CSV_TXT_to_XLS
             if (line[0].ToString().Contains($".{settings.TypeFileWatch.ToLower()}"))
             {
                 TxtB_FileOriginal.Text = line[0].ToString();
-                StatusText.Text = "Тут будет имя преобразованного файла";
+                lbl_StatusText.Text = "Тут будет имя преобразованного файла";
             }
             else TxtB_FileOriginal.Text = $"Не является файлом {settings.TypeFileWatch}";
         }
@@ -179,8 +190,9 @@ namespace CSV_TXT_to_XLS
                 settings.TypeFileWatch = "TXT";
                 Report = new ReportFromTXT(); ;
             }
-            StatusText.Text = "Тут будет имя преобразованного файла";
+            lbl_StatusText.Text = "Тут будет имя преобразованного файла";
             TxtB_FileOriginal.Text = $"Выберите или перетащите {settings.TypeFileWatch} файл";
+ 
         }
 
         void ResizeThisForm()
@@ -243,6 +255,15 @@ namespace CSV_TXT_to_XLS
             }
             else MessageBox.Show("Путь для отслеживания отсутствует", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
+        }
+
+        private void SetStatusText(string status)
+        {
+            BeginInvoke(new Action(() => {
+                lbl_StatusText.Text = status;
+                lbl_StatusText.ForeColor = status == "Идет формирование файла" ? Color.YellowGreen : Color.Green; 
+                }));
+            ;
         }
     }
 

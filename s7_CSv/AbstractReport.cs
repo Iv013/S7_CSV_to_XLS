@@ -15,11 +15,14 @@ namespace CSV_TXT_to_XLS
 {
     public abstract class AbstractReport
     {
-
+        public string stateReport { get; set; }
+        public delegate void Method( string str);
+        public event Method SetState = null;
         public async void MakeReport(List<string> ListFile)
         {
             await Task.Run(() =>   
             {
+                SetState("Идет формирование файла");
                 StringBuilder line = new StringBuilder();                                                                           
                 var package = new ExcelPackage();
                 string extension = Path.GetExtension(ListFile[0].ToString());
@@ -33,24 +36,22 @@ namespace CSV_TXT_to_XLS
                     line.Append(streamReader.ReadLine());
                     int i = 1;
                     int columnNumberWithMessage = 3;
-                    while ( line.Length > 0)                                                                  
+                    while ( line.Length > 0)
                     {
                         string[] dat = GetArrayString(line.ToString());
-                        for (int j = 1; j <= dat.Length; j++)                                             
+                        for (int j = 1; j <= dat.Length; j++)
                         {
                             if (dat[j - 1].Contains("Текст сообщения"))
                             {
                                 columnNumberWithMessage = j;
                                 continue;
                             }
-                                
-                            sheet.Column(j).Width = (sheet.Column(j).Width < dat[j - 1].Length) ? dat[j - 1].Length : sheet.Column(j).Width;  
+
+                            sheet.Column(j).Width = (sheet.Column(j).Width < dat[j - 1].Length) ? dat[j - 1].Length : sheet.Column(j).Width;
                             sheet.Cells[i + numberLine, j].Value = dat[j - 1];
-                            sheet.Cells[i + numberLine, j].Style.Border.BorderAround(ExcelBorderStyle.Thin);                       
                         }
 
-                        sheet.Cells[i + numberLine, 1, i + numberLine, dat.Length + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        sheet.Cells[i + numberLine, 1, i + numberLine, dat.Length + 1].Style.Fill.BackgroundColor.SetColor(GetColor(line.ToString())); 
+                        SetBordetAndColor(line.ToString(), sheet, numberLine+i,  dat.Length+1);    
                         list.Add(dat[columnNumberWithMessage - 1]);
                         line.Clear();
                         line.Append(streamReader.ReadLine());
@@ -60,16 +61,28 @@ namespace CSV_TXT_to_XLS
                     streamReader.Close();
                     numberLine = list.Count;
                 }
+
                 package.Workbook.Worksheets.Add("Cортировка", GetSortSheetRepeatedMessage(list));
                 sheet.Protection.IsProtected = false;          
-                File.WriteAllBytes(ListFile[0].ToString().Replace(extension, ".xlsx"), package.GetAsByteArray());   
-
+                File.WriteAllBytes(ListFile[0].ToString().Replace(extension, ".xlsx"), package.GetAsByteArray());
+                SetState(ListFile[0].ToString().Replace(extension, ".xlsx"));
             });
         }
 
 
 
-         private ExcelWorksheet GetSortSheetRepeatedMessage(List<string> list)
+        private void SetBordetAndColor(string line, ExcelWorksheet sheet,  int StartFieald, int endFeald)
+        {
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Fill.BackgroundColor.SetColor(GetColor(line.ToString()));
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Bottom.Style =ExcelBorderStyle.Thin;
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+        }
+
+
+        private ExcelWorksheet GetSortSheetRepeatedMessage(List<string> list)
         {
             var newlist = list.GroupBy(x => x)
                 .Where(x => x.Count() > 1)
@@ -89,6 +102,6 @@ namespace CSV_TXT_to_XLS
         public abstract string[] GetArrayString(string line );
     
 
-
+       
     }
 }

@@ -37,7 +37,7 @@ namespace CSV_TXT_to_XLS
             this.TxtB_FileOriginal = new System.Windows.Forms.TextBox();
             this.btn_MakeOneReport = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.StatusText = new System.Windows.Forms.Label();
+            this.lbl_StatusText = new System.Windows.Forms.Label();
             this.btn_OpenReport = new System.Windows.Forms.Button();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
@@ -126,17 +126,20 @@ namespace CSV_TXT_to_XLS
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
-            // StatusText
+            // lbl_StatusText
             // 
-            this.StatusText.Font = new System.Drawing.Font("Microsoft YaHei", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.StatusText.ForeColor = System.Drawing.Color.DarkGreen;
-            this.StatusText.Location = new System.Drawing.Point(20, 179);
-            this.StatusText.Name = "StatusText";
-            this.StatusText.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.StatusText.Size = new System.Drawing.Size(563, 51);
-            this.StatusText.TabIndex = 9;
-            this.StatusText.Text = "Тут будет имя преобразованного файла";
-            this.StatusText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lbl_StatusText.AutoEllipsis = true;
+            this.lbl_StatusText.Cursor = System.Windows.Forms.Cursors.Default;
+            this.lbl_StatusText.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.lbl_StatusText.Font = new System.Drawing.Font("Microsoft YaHei", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lbl_StatusText.ForeColor = System.Drawing.Color.ForestGreen;
+            this.lbl_StatusText.Location = new System.Drawing.Point(20, 179);
+            this.lbl_StatusText.Name = "lbl_StatusText";
+            this.lbl_StatusText.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.lbl_StatusText.Size = new System.Drawing.Size(563, 51);
+            this.lbl_StatusText.TabIndex = 9;
+            this.lbl_StatusText.Text = "Тут будет имя преобразованного файла";
+            this.lbl_StatusText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btn_OpenReport
             // 
@@ -288,7 +291,7 @@ namespace CSV_TXT_to_XLS
             this.Controls.Add(this.btn_OpenReport);
             this.Controls.Add(this.TxtB_FileOriginal);
             this.Controls.Add(this.lb_statusWatcher);
-            this.Controls.Add(this.StatusText);
+            this.Controls.Add(this.lbl_StatusText);
             this.Controls.Add(this.txtB_FolderForWatcher);
             this.Controls.Add(this.btn_MakeReportAllFile);
             this.Controls.Add(this.btn_MakeOneReport);
@@ -319,7 +322,7 @@ namespace CSV_TXT_to_XLS
         private System.Windows.Forms.TextBox TxtB_FileOriginal;
         private System.Windows.Forms.Button btn_MakeOneReport;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Label StatusText;
+        private System.Windows.Forms.Label lbl_StatusText;
         private System.Windows.Forms.Button btn_OpenReport;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.RadioButton radioButton2;

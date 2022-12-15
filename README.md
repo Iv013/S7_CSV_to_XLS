@@ -14,18 +14,18 @@
  <h2>Where it is used</h2>
     <p> This application is used to format the log of alarm messages, which is exported from SCADA System in an unformatted text. This output has no color of messages by priority and no search options.</p>
        <div align="center">
-          <image src="https://github.com/Iv013/hexlet-git/blob/main/Unformatted.png"
+          <image src="https://github.com/Iv013/S7_CSV_to_XLS/blob/master/s7_CSv/Properties/Media/Unformatted.png"
             style="width:450px" />
            <p>Unformatted message log</p>
      </div>    
       <div align="center">
-  <image src="https://github.com/Iv013/hexlet-git/blob/main/formatted.png"
+  <image src="https://github.com/Iv013/S7_CSV_to_XLS/blob/master/s7_CSv/Properties/Media/formatted.png"
        style="width:450px" />
     <p>Formatted message log</p>
    </div>
       <p style="text-indent: 25px;">Additionally, when the log is generated, it counts repeated messages for analysis and troubleshooting.</p>
      <div align="center">
-  <image src="https://github.com/Iv013/hexlet-git/blob/main/sort.png"
+  <image src="https://github.com/Iv013/S7_CSV_to_XLS/blob/master/s7_CSv/Properties/Media/sort.png"
        style="width:450px" />
   </div>
 
@@ -46,7 +46,7 @@
     </li>
 <br>
  <div align="center">
-   <image src="https://github.com/Iv013/hexlet-git/blob/main/WatcherFile.gif"  style="width:500px"  />
+   <image src="https://github.com/Iv013/S7_CSV_to_XLS/blob/master/s7_CSv/Properties/Media/WatcherFile.gif"  style="width:500px"  />
  </div>
  <br>
    <li> Manual mode
@@ -54,12 +54,12 @@
         <li> Select (or drag and drop on a field) an unformatted file , and then click button "Convert" then a method is called and it formats the text from the file and saves it as XLSM file. </li>
        <br>
    <div align="center">
-   <image src="https://github.com/Iv013/hexlet-git/blob/main/GenerateFile.gif"  style="width:500px"   />
+   <image src="https://github.com/Iv013/S7_CSV_to_XLS/blob/master/s7_CSv/Properties/Media/GenerateFile.gif"  style="width:500px"   />
  </div>
         <br>
   <li>If you have many files that are needed to be formatted, you can do it all at once. It is necessary to expand the window and drag all the files into the ListBox, and then click the Convert button</li>
     <div align="center">
-   <image src="https://github.com/Iv013/hexlet-git/blob/main/ManyFile.gif"  style="width:500px"   />
+   <image src="https://github.com/Iv013/S7_CSV_to_XLS/blob/master/s7_CSv/Properties/Media/ManyFile.gif"  style="width:500px"   />
  </div>
 
 

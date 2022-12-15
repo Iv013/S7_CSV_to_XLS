@@ -74,15 +74,15 @@ namespace CSV_TXT_to_XLS
             Opacity = settings.HideMode ? 0 : 1;
             ShowInTaskbar = checkBox1.Checked ? false : true;
 
-
+            Type_change();
+           
             watcher = new Watcher(settings.TypeFileWatch, Report.MakeReport);
             watcher.State += getStateWatcher;
              if (Directory.Exists(txtB_FolderForWatcher.Text))
              {
                 watcher.Findfile(txtB_FolderForWatcher.Text, $"*.{settings.TypeFileWatch.ToLower()}");
              }
-            Type_change();
-            Report.SetState += SetStatusText;
+            
         }
         void SelectFolder()
         {
@@ -184,11 +184,13 @@ namespace CSV_TXT_to_XLS
            if (radioButton1.Checked) 
             {
                 settings.TypeFileWatch = "CSV";
-                Report = new ReportFromCSV(); ;
+                Report = new ReportFromCSV();
+                Report.SetState += SetStatusText;
             } else
             {
                 settings.TypeFileWatch = "TXT";
-                Report = new ReportFromTXT(); ;
+                Report = new ReportFromTXT();
+                Report.SetState += SetStatusText;
             }
             lbl_StatusText.Text = "Тут будет имя преобразованного файла";
             TxtB_FileOriginal.Text = $"Выберите или перетащите {settings.TypeFileWatch} файл";

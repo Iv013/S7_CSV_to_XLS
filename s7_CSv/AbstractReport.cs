@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO.Packaging;
 using System.Security.Cryptography;
 
+
 namespace CSV_TXT_to_XLS
 {
     public abstract class AbstractReport
@@ -25,61 +26,72 @@ namespace CSV_TXT_to_XLS
                 SetState("Идет формирование файла");
                 StringBuilder line = new StringBuilder();                                                                           
                 var package = new ExcelPackage();
-                string extension = Path.GetExtension(ListFile[0].ToString());
                 var sheet = package.Workbook.Worksheets.Add("Журнал сообщений");  
-                int numberLine = 0;
-                var list = new List<string>();
+                int numberLine = 0, MaxColomn=0;
+                var listMessages = new List<string>();
                 for (int fileNumber = 0; fileNumber < ListFile.Count; fileNumber++)
                 {
                     if (!File.Exists(ListFile[fileNumber].ToString())) continue;
-                    StreamReader streamReader = new StreamReader(ListFile[fileNumber].ToString(), Encoding.GetEncoding(1251));                                          
-                    line.Append(streamReader.ReadLine());
-                    int i = 1;
-                    int columnNumberWithMessage = 3;
-                    while ( line.Length > 0)
+                    using (StreamReader streamReader = new StreamReader(ListFile[fileNumber].ToString(), Encoding.GetEncoding(1251)))
                     {
-                        string[] dat = GetArrayString(line.ToString());
-                        for (int j = 1; j <= dat.Length; j++)
+                        line.Append(streamReader.ReadLine());
+                        int i = 1;
+                        int columnNumberWithMessage = 3;
+                        while (line.Length > 0)
                         {
-                            if (dat[j - 1].Contains("Текст сообщения"))
+                            string[] dat = GetArrayString(line.ToString());
+                            MaxColomn = dat.Length;
+                            for (int j = 1; j <= dat.Length; j++)
                             {
-                                columnNumberWithMessage = j;
-                                continue;
+                                if (dat[j - 1].Contains("Текст сообщения"))
+                                {
+                                    columnNumberWithMessage = j;
+                                    continue;
+                                }
+
+                                sheet.Column(j).Width = (sheet.Column(j).Width < dat[j - 1].Length) ? dat[j - 1].Length : sheet.Column(j).Width;
+                                sheet.Cells[i + numberLine, j].Value = dat[j - 1];
                             }
 
-                            sheet.Column(j).Width = (sheet.Column(j).Width < dat[j - 1].Length) ? dat[j - 1].Length : sheet.Column(j).Width;
-                            sheet.Cells[i + numberLine, j].Value = dat[j - 1];
+                            SetColorCells( sheet, numberLine + i, MaxColomn, line.ToString());
+                            listMessages.Add(dat[columnNumberWithMessage - 1]);
+                            line.Clear();
+                            line.Append(streamReader.ReadLine());
+                            i++;
                         }
-
-                        SetBordetAndColor(line.ToString(), sheet, numberLine+i,  dat.Length+1);    
-                        list.Add(dat[columnNumberWithMessage - 1]);
-                        line.Clear();
-                        line.Append(streamReader.ReadLine());
-                        i++;
                     }
-
-                    streamReader.Close();
-                    numberLine = list.Count;
+         
+                    numberLine = listMessages.Count;
                 }
 
-                package.Workbook.Worksheets.Add("Cортировка", GetSortSheetRepeatedMessage(list));
+                SetBorderCells(sheet, listMessages.Count(), MaxColomn);
+                string extension = Path.GetExtension(ListFile[0].ToString());
+                package.Workbook.Worksheets.Add("Cортировка", GetSortSheetRepeatedMessage(listMessages));
                 sheet.Protection.IsProtected = false;          
                 File.WriteAllBytes(ListFile[0].ToString().Replace(extension, ".xlsx"), package.GetAsByteArray());
                 SetState(ListFile[0].ToString().Replace(extension, ".xlsx"));
             });
         }
+        public abstract string[] GetArrayString(string line);
 
-
-
-        private void SetBordetAndColor(string line, ExcelWorksheet sheet,  int StartFieald, int endFeald)
+        private void SetBorderCells( ExcelWorksheet sheet, int endRow, int endColumn)
         {
-            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Fill.BackgroundColor.SetColor(GetColor(line.ToString()));
-            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Bottom.Style =ExcelBorderStyle.Thin;
-            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[1, 1, endRow, endColumn].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[1, 1, endRow, endColumn].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[1, 1, endRow, endColumn].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[1, 1, endRow, endColumn].Style.Border.Right.Style = ExcelBorderStyle.Thin;
         }
+
+        private void SetColorCells( ExcelWorksheet sheet,  int StartFieald, int endFeald, string message )
+        {
+            var Color= GetColor(message);
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            sheet.Cells[StartFieald, 1, StartFieald, endFeald].Style.Fill.BackgroundColor.SetColor(Color);
+        }
+
+
+       public abstract Color GetColor(string line);
+       
 
 
         private ExcelWorksheet GetSortSheetRepeatedMessage(List<string> list)
@@ -98,10 +110,5 @@ namespace CSV_TXT_to_XLS
             return sheet2;
         }
 
-       public abstract Color GetColor(string line);
-        public abstract string[] GetArrayString(string line );
-    
-
-       
     }
 }

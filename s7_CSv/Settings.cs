@@ -18,12 +18,5 @@ namespace CSV_TXT_to_XLS
         public bool HideMode { get; set; }
         public bool ModeHeight { get; set; }
         public string TypeFileWatch { get; set; } 
-      
-
-
-
-
-
-
     }
 }

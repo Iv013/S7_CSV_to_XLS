@@ -13,7 +13,6 @@ namespace CSV_TXT_to_XLS
         {
             string[] result = { line.Remove(10).Replace("-", ":"), line.Remove(21).Remove(0, 11), line.Remove(0, 22), };
             result[2] = result[2].Replace("@", "").Replace("!", "").Replace("%", "").Replace("?", "");
-
             return result;
         }
 

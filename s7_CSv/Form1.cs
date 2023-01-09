@@ -35,8 +35,7 @@ namespace CSV_TXT_to_XLS
             radioButton1.CheckedChanged += (s, a) => { settings.integrator = radioButton1.Checked; };
             btn_SelectFolder.Click += (s, a) => { SelectFolder(); };
             btn_FindFile.Click += (s, a) => { FindFileForReport(); };
-            btn_formHeigth.Click += (s, a) =>{  ResizeThisForm();};
-            
+            btn_formHeigth.Click += (s, a) =>{  ResizeThisForm();};         
         }
         void Form1_Load(object sender, EventArgs e)
         {

@@ -1,9 +1,6 @@
-﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CSV_TXT_to_XLS
@@ -46,11 +43,10 @@ namespace CSV_TXT_to_XLS
 
         async void OnCreated(object sender, FileSystemEventArgs e)
         {
-                await Task.Delay(1000);
-                List<string> files = new List<string>();
-                files.Add(e.FullPath);
-
-                RunMethod(files);
+            await Task.Delay(1000);
+            List<string> files = new List<string>();
+            files.Add(e.FullPath);
+            RunMethod(files);
         }
     }
 

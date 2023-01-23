@@ -215,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractReport.cs" />
+    <Compile Include="ExcelFormated.cs" />
     <Compile Include="ExtansionAnimationForm.cs" />
     <Compile Include="ReportFromCSV.cs" />
     <Compile Include="ReportFromTXT.cs" />
